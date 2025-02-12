@@ -85,6 +85,15 @@
    - **Use Case:** Critical operations where duplicates can cause errors, like financial transactions.
 
 ### **MQTT Packet Structure Detailed:**
+
+<p align="center">
+  <img src="./images/mqttHeader.PNG" alt="alt text">
+</p>
+
+<p align="center">
+  <img src="./images/detailedMqttHeader.PNG" alt="alt text">
+</p>
+
 1. **Fixed Header (2 bytes minimum):**
    - **Byte 1:**
      - **Bits 7-4:** Message Type (CONNECT=1, PUBLISH=3, SUBSCRIBE=8, etc.)
@@ -113,6 +122,11 @@
   - **Proxy and Caching Capabilities:** Supports **intermediary devices** to optimize network performance and reduce latency.
 
 ### **CoAP Packet Structure Detailed:**
+
+<p align="center">
+  <img src="./images/coapHeader.PNG" alt="alt text">
+</p>
+
 1. **Header (4 bytes):**
    - **Byte 1:**
      - **Bits 7-6:** Version (always set to 01)
