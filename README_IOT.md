@@ -68,6 +68,39 @@
   - **Lightweight Overhead:** Minimal packet size makes it suitable for **low-bandwidth networks**.
   - **Will Messages:** Sends a notification if a device disconnects unexpectedly, ensuring system awareness.
 
+### **MQTT QoS Levels Detailed:**
+1. **QoS 0 - At Most Once:**
+   - **How Messages are Sent:** The client sends a message without waiting for acknowledgment. This is a "fire-and-forget" approach.
+   - **Responses:** No response is expected.
+   - **Use Case:** Suitable for non-critical data, like sensor readings where occasional loss is acceptable.
+
+2. **QoS 1 - At Least Once:**
+   - **How Messages are Sent:** The message is sent and the sender waits for an acknowledgment (PUBACK) from the receiver. If no acknowledgment is received, the message is resent.
+   - **Responses:** PUBACK (Acknowledgment) from the receiver.
+   - **Use Case:** Suitable for scenarios where data must arrive but duplicates are acceptable, like logging temperature readings.
+
+3. **QoS 2 - Exactly Once:**
+   - **How Messages are Sent:** This level uses a four-step handshake (PUBLISH, PUBREC, PUBREL, PUBCOMP) to ensure the message is delivered exactly once.
+   - **Responses:** PUBREC (Received), PUBREL (Release), PUBCOMP (Complete).
+   - **Use Case:** Critical operations where duplicates can cause errors, like financial transactions.
+
+### **MQTT Packet Structure Detailed:**
+1. **Fixed Header (2 bytes minimum):**
+   - **Byte 1:**
+     - **Bits 7-4:** Message Type (CONNECT=1, PUBLISH=3, SUBSCRIBE=8, etc.)
+     - **Bit 3:** DUP flag (indicates duplicate delivery)
+     - **Bits 2-1:** QoS level (00=QoS 0, 01=QoS 1, 10=QoS 2)
+     - **Bit 0:** RETAIN flag (retain the message on the broker)
+   - **Byte 2:** Remaining Length (indicates the number of bytes in the variable header and payload)
+
+2. **Variable Header (varies by message type):**
+   - For **CONNECT:** Protocol name, version, connection flags, keep-alive timer.
+   - For **PUBLISH:** Topic name, packet identifier (if QoS > 0).
+
+3. **Payload:**
+   - **CONNECT:** Client identifier, optional username and password.
+   - **PUBLISH:** Actual message content.
+
 ### **CoAP (Constrained Application Protocol)**
 - **Standardized by IETF**, CoAP is designed for **constrained devices and networks**. It follows a **client-server model** similar to HTTP but optimized for IoT.
 - **Key Features:**
@@ -79,25 +112,20 @@
   - **Built-in Resource Discovery:** Allows devices to discover available resources automatically using **multicast requests**.
   - **Proxy and Caching Capabilities:** Supports **intermediary devices** to optimize network performance and reduce latency.
 
----
+### **CoAP Packet Structure Detailed:**
+1. **Header (4 bytes):**
+   - **Byte 1:**
+     - **Bits 7-6:** Version (always set to 01)
+     - **Bits 5-4:** Type (00=CON, 01=NON, 10=ACK, 11=RST)
+     - **Bits 3-0:** Token length (0-8 bytes)
+   - **Byte 2:** Code (e.g., 0.01 for GET, 0.02 for POST)
+   - **Bytes 3-4:** Message ID (used to match messages with responses)
 
-## Packet Structures
+2. **Token (0-8 bytes):** Used to correlate requests and responses.
 
-### **MQTT Packets**:
-1. **CONNECT**: Initiates a connection between client and broker.
-2. **CONNACK**: Acknowledgment from the broker to the client.
-3. **PUBLISH**: Transmits data from client to broker (or broker to subscribers).
-4. **SUBSCRIBE**: Client subscribes to specific topics.
-5. **SUBACK**: Acknowledgment of subscription.
-6. **PINGREQ/PINGRESP**: Keep-alive mechanism to ensure connection stability.
-7. **DISCONNECT**: Graceful disconnection from the broker.
+3. **Options:** Encoded in a delta format to reduce size, include URI paths, query parameters, etc.
 
-### **CoAP Packets**:
-1. **Confirmable (CON)**: Requires acknowledgment (ACK) from the receiver.
-2. **Non-confirmable (NON)**: No acknowledgment required.
-3. **Acknowledgment (ACK)**: Response to confirmable messages.
-4. **Reset (RST)**: Indicates a failure to process a message.
-5. **Requests/Responses**: GET, POST, PUT, DELETE methods similar to HTTP.
+4. **Payload:** Prefixed by a 0xFF byte to indicate the start of the payload.
 
 ---
 
@@ -157,3 +185,4 @@ Choosing between **MQTT** and **CoAP** depends on the specific requirements of y
 - **CoAP** is ideal for low-power, constrained devices with RESTful communication needs.
 
 Consider the hardware, network constraints, and desired system architecture when making your choice.
+
